@@ -33,10 +33,8 @@ function splitNameAndGetInitialsAndYear(fullName, dob) {
     return getInitialsAndYear(names[0], names[names.length - 1], dob);
 }
 
-function getDoses(badgeArrayCurr, badgeArrayPrevious) {
-    if (!badgeArrayCurr) return "0";
-    if (badgeArrayCurr.next_appointment) return "1";
-    return "2";
+function isFullyVaccinated(vaccinationEvent) {
+    return vaccinationEvent.dn < vaccinationEvent.sd;
 }
 
 async function sign(_type, _version, priKeyPEM, pubKeyId, payloadValueArray) {
@@ -44,8 +42,6 @@ async function sign(_type, _version, priKeyPEM, pubKeyId, payloadValueArray) {
 }
 
 app.post('/status', async function (req, res) {
-    console.log(req.body);
-
     let raw = { 
         fullName: req.body.fullName, 
         dob: req.body.dob 
@@ -63,8 +59,6 @@ app.post('/status', async function (req, res) {
 });
 
 app.post('/hc1status', async function (req, res) {
-    console.log(req.body);
-
     const verified = await DCC.unpackAndVerify(req.body.qr);
 
     if (!verified) {
@@ -74,20 +68,30 @@ app.post('/hc1status', async function (req, res) {
 
     const data = await DCC.parseCWT(verified);
     
-    if (data && data.v && data.v.length > 0 && data.v[0]) { 
-        // Has a vaccination record.
+    if (!data) {
+        res.send({status: "Certificate is valid but cannot be found", certificate: data});
+        return;
+    }
 
-        if (data.v[0].dn < data.v[0].sd) {
-            res.send({status: "Not Fully Vaccinated", certificate: verified});
+    if (!data.v || data.v.length == 0) {
+        res.send({status: "Certificate is valid but does not include a vaccination event", certificate: data});
+        return;
+    }
+
+    if (data.v[0]) { 
+        if (!isFullyVaccinated(data.v[0])) {
+            res.send({status: "Not Fully Vaccinated", certificate: data});
             return;
         }
 
         let raw = { 
             fullName: data.nam.gn + " " + data.nam.fn, 
-            dob: data.dob
+            dob: data.dob, 
+            certificate: data
         } 
         let signedCerts = {
-            raw
+            raw,
+            status: "Verified"
         }
 
         const initals = getInitialsAndYear(data.nam.gn, data.nam.fn, data.dob);
@@ -99,7 +103,7 @@ app.post('/hc1status', async function (req, res) {
         return;
     }
  
-    res.send({status: "Unable to Decode Certificate", certificate: verified});
+    res.send({status: "Unable to Decode Certificate", certificate: data});
     return;
 });
 

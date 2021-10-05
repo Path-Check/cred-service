@@ -20,7 +20,7 @@ Create a new QR code using the following command
 
 ## Generating new Version
 
-GitHub Actions generates a new [Release](https://github.com/vitorpamplona/vaccine-certificate-tracking-app/releases) when npm version is run and pushed to the repo.
+GitHub Actions generates a new [Release](https://github.com/Path-Check/cred-service/releases) when npm version is run and pushed to the repo.
 
 ```
 npm version <version number: x.x.x>
@@ -28,5 +28,5 @@ npm version <version number: x.x.x>
 
 ## Contributing
 
-[Issues](https://github.com/Path-Check/massqr/issues) and [pull requests](https://github.com/Path-Check/massqr/pulls) are very welcome! :)
+[Issues](https://github.com/Path-Check/cred-service/issues) and [pull requests](https://github.com/Path-Check/cred-service/pulls) are very welcome! :)
 

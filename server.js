@@ -41,6 +41,7 @@ async function sign(_type, _version, priKeyPEM, pubKeyId, payloadValueArray) {
     return await CRED.signAndPack(_type, _version, priKeyPEM, pubKeyId, payloadValueArray);
 }
 
+/**
 app.post('/status', async function (req, res) {
     let raw = { 
         fullName: req.body.fullName, 
@@ -57,6 +58,7 @@ app.post('/status', async function (req, res) {
 
     res.send(signedCerts);
 });
+ */
 
 app.post('/hc1status', async function (req, res) {
     const verified = await DCC.unpackAndVerify(req.body.qr);
